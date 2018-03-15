@@ -1,6 +1,24 @@
 variable "coreos_ami" {
-  type        = "string"
+  type        = "map"
   description = "CoreOS AMI to use for creating our controllers."
+
+  default = {
+    "ap-northeast-1" = "ami-884835ee"
+    "ap-northeast-2" = "ami-1455f77a"
+    "ap-south-1"     = "ami-991845f6"
+    "ap-southeast-1" = "ami-b9c280c5"
+    "ap-southeast-2" = "ami-04be7b66"
+    "ca-central-1"   = "ami-9e7cf8fa"
+    "eu-central-1"   = "ami-862140e9"
+    "eu-west-1"      = "ami-a61464df"
+    "eu-west-2"      = "ami-3e0eeb59"
+    "eu-west-3"      = "ami-1f9d2b62"
+    "sa-east-1"      = "ami-022d646e"
+    "us-east-1"      = "ami-3f061b45"
+    "us-east-2"      = "ami-85ffcbe0"
+    "us-west-1"      = "ami-cc0900ac"
+    "us-west-2"      = "ami-692faf11"
+  }
 }
 
 variable "instance_type" {
@@ -22,22 +40,22 @@ variable "domain_name" {
 
 resource "aws_instance" "controller" {
   count                = "${length(var.controller_subnets)}"
-  ami                  = "${var.coreos_ami}"
+  ami                  = "${var.coreos_ami[data.aws_region.current.name]}"
   instance_type        = "${var.instance_type}"
   key_name             = "kubernetes"
   iam_instance_profile = "${var.instance_profile}"
 
   tags {
-    Name            = "kube-controller-${count.index + 1}"
+    Name            = "kuberform-controller-${count.index + 1}"
     Owner           = "infrastructure"
     Billing         = "costcenter"
     OperatingSystem = "coreos"
-    AMI             = "${var.coreos_ami}"
+    AMI             = "${var.coreos_ami[data.aws_region.current.name]}"
     Hostname        = "${format("controller%02-d.%s.%s", count.index, data.aws_region.current.name, var.domain_name)}"
   }
 
   volume_tags {
-    Name    = "kube-controller-volume-${count.index + 1}"
+    Name    = "kuberform-controller-volume-${count.index + 1}"
     Owner   = "infrastructure"
     Billing = "costcenter"
   }

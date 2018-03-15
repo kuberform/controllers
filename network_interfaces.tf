@@ -18,7 +18,7 @@ resource "aws_network_interface" "controller" {
   ]
 
   tags {
-    Name     = "kube-controller-${count.index + 1}"
+    Name     = "kuberform-controller-${count.index + 1}"
     Owner    = "infrastructure"
     Billing  = "costcenter"
     Hostname = "${format("controller%02-d.%s.%s", count.index, data.aws_region.current.name, var.domain_name)}"
